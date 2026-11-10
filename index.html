@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0b1220">
+  <meta name="description" content="化险为夷 · 化工安全连连看：把危险化学品与正确的安全措施、安全标识与含义配对消除，在游戏中学习危化品应急处置、储存与作业安全要求。">
+  <title>化险为夷 · 化工安全连连看</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%230b1220'/%3E%3Cpath d='M50 16l26 11v24c0 18-11 30-26 35-15-5-26-17-26-35V27z' fill='%23ffb020'/%3E%3Cpath d='M50 32v26M50 66v6' stroke='%230b1220' stroke-width='7' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="app">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-logo" aria-hidden="true">
+          <svg viewBox="0 0 100 100" width="34" height="34"><path d="M50 12l30 12v27c0 20-13 34-30 39-17-5-30-19-30-39V24z" fill="#ffb020"/><path d="M50 30v26M50 64v7" stroke="#0b1220" stroke-width="8" stroke-linecap="round"/></svg>
+        </span>
+        <span class="brand-text">
+          <strong>化险为夷</strong>
+          <span>化工安全连连看</span>
+        </span>
+      </div>
+
+      <div class="hud" id="hud" aria-label="游戏状态">
+        <div class="hud-chip"><span class="hud-label">关卡</span><b id="hud-level">1</b></div>
+        <div class="hud-chip"><span class="hud-label">得分</span><b id="hud-score">0</b></div>
+        <div class="hud-chip hud-combo" id="hud-combo-chip"><span class="hud-label">连击</span><b id="hud-combo">0</b></div>
+        <div class="hud-chip"><span class="hud-label">剩余</span><b id="hud-left">10</b><span class="hud-unit">对</span></div>
+        <div class="hud-chip hud-time" id="hud-time-chip"><span class="hud-label">时间</span><b id="hud-time">03:00</b></div>
+      </div>
+
+      <div class="top-actions">
+        <button class="icon-btn" id="btn-sound" type="button" aria-label="音效开关" title="音效开关">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path class="sound-wave" d="M16 8.5a5 5 0 010 7M18.5 6a8.5 8.5 0 010 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </button>
+        <button class="icon-btn" id="btn-pause" type="button" aria-label="暂停游戏" title="暂停">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1" fill="currentColor"/><rect x="14" y="5" width="4" height="14" rx="1" fill="currentColor"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="progress" aria-hidden="true"><div class="progress-bar" id="progress-bar"></div></div>
+
+    <main class="stage" id="stage">
+      <div class="board" id="board" aria-label="连连看棋盘">
+        <svg class="path-layer" id="path-layer" aria-hidden="true"></svg>
+      </div>
+    </main>
+
+    <footer class="toolbar">
+      <button class="tool-btn" id="btn-hint" type="button" title="提示一对可消除的卡片">
+        <span class="tool-icon" aria-hidden="true">💡</span>提示<em id="hint-count">3</em>
+      </button>
+      <button class="tool-btn" id="btn-shuffle" type="button" title="重新排列剩余卡片">
+        <span class="tool-icon" aria-hidden="true">🔀</span>洗牌<em id="shuffle-count">2</em>
+      </button>
+      <button class="tool-btn" id="btn-codex" type="button" title="查看已收集的安全知识">
+        <span class="tool-icon" aria-hidden="true">📖</span>图鉴<em id="codex-count">0</em>
+      </button>
+    </footer>
+  </div>
+
+  <!-- 知识卡片（配对成功后弹出，不遮挡棋盘） -->
+  <aside class="knowledge-card" id="knowledge-card" aria-live="polite" hidden>
+    <div class="kc-head">
+      <span class="kc-badge" id="kc-badge">安全知识</span>
+      <button class="kc-close" id="kc-close" type="button" aria-label="关闭知识卡片">×</button>
+    </div>
+    <h3 id="kc-title"></h3>
+    <p id="kc-body"></p>
+    <p class="kc-basis" id="kc-basis"></p>
+  </aside>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- 开始界面 -->
+  <section class="screen" id="screen-start">
+    <div class="screen-inner start-inner">
+      <p class="eyebrow">危险化学品 · 安全标识 · 应急处置</p>
+      <h1 class="game-title">化险为夷</h1>
+      <p class="game-sub">化工安全连连看</p>
+      <p class="game-tagline">把危险化学品与正确的安全措施连在一起。<br>三关、三十组知识，边连边学。</p>
+
+      <div class="level-cards" id="level-cards"></div>
+
+      <div class="start-actions">
+        <button class="btn btn-primary btn-lg" id="btn-start" type="button">开始游戏</button>
+        <button class="btn btn-ghost" id="btn-rules" type="button">玩法说明</button>
+        <button class="btn btn-ghost" id="btn-about" type="button">知识依据</button>
+      </div>
+
+      <div class="rules-panel" id="rules-panel" hidden>
+        <h3>怎么玩</h3>
+        <ol>
+          <li>点击两张卡片：一张是<b>危险化学品 / 安全标识</b>，另一张是它对应的<b>安全措施 / 含义</b>。</li>
+          <li>配对正确且满足连线规则（路径转弯不超过 2 次、不被其他卡片挡住）才能消除。</li>
+          <li>配错扣 10 分并倒扣 3 秒；连续配对成功有连击加分。</li>
+          <li>倒计时结束前清空棋盘即通关；剩余时间与零失误会转化为奖励分。</li>
+          <li>卡住时可用「提示」「洗牌」，次数有限；无可消组合时系统会自动洗牌。</li>
+        </ol>
+        <p class="rules-note">每次配对成功都会弹出知识卡片，注明依据来源；赛后可到「图鉴」复习。</p>
+      </div>
+
+      <div class="rules-panel" id="about-panel" hidden>
+        <h3>知识依据</h3>
+        <p>游戏中的安全知识依据国家标准（GB）、行业标准、化学品安全技术说明书（MSDS/SDS）与应急救护教材整理，逐条标注在知识卡片与 README 中。</p>
+        <ul class="basis-list">
+          <li>GB 2894-2008《安全标志及其使用导则》</li>
+          <li>GB 30871-2022《危险化学品企业特殊作业安全规范》</li>
+          <li>GB 15603-2022《危险化学品仓库储存通则》</li>
+          <li>GB/T 16483-2008《化学品安全技术说明书 内容和项目顺序》</li>
+          <li>GB 9448-1999《焊接与切割安全》</li>
+          <li>GB 30000 系列《化学品分类和标签规范》</li>
+        </ul>
+        <p class="rules-note">游戏内容仅用于教学演示，实际作业请以最新法规标准和企业操作规程为准。</p>
+      </div>
+
+      <p class="start-foot">纯前端 · 无外部图片音效 · 桌面与手机均可玩</p>
+    </div>
+  </section>
+
+  <!-- 暂停界面 -->
+  <section class="screen" id="screen-pause" hidden>
+    <div class="screen-inner pause-inner">
+      <h2 class="screen-title">已暂停</h2>
+      <p class="screen-sub">休息一下，安全第一。</p>
+      <div class="screen-actions column">
+        <button class="btn btn-primary" id="btn-resume" type="button">继续游戏</button>
+        <button class="btn btn-ghost" id="btn-restart" type="button">重新开始本关</button>
+        <button class="btn btn-ghost" id="btn-quit" type="button">退出到首页</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 结算界面 -->
+  <section class="screen" id="screen-result" hidden>
+    <div class="screen-inner result-inner">
+      <div class="rank-badge" id="result-rank">A</div>
+      <h2 class="screen-title" id="result-title">通关成功</h2>
+      <p class="screen-sub" id="result-desc"></p>
+      <div class="stats" id="result-stats"></div>
+
+      <div class="review-block">
+        <h3 class="review-title">知识复盘 <span class="review-count" id="review-count"></span></h3>
+        <p class="review-hint" id="review-hint"></p>
+        <div class="review-list" id="review-list"></div>
+      </div>
+
+      <div class="screen-actions">
+        <button class="btn btn-primary" id="btn-retry" type="button">重玩本关</button>
+        <button class="btn btn-ghost" id="btn-next" type="button">下一关</button>
+        <button class="btn btn-ghost" id="btn-home" type="button">返回首页</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 知识图鉴 -->
+  <div class="modal" id="modal-codex" hidden>
+    <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="codex-title">
+      <header class="modal-head">
+        <h2 id="codex-title">安全知识图鉴</h2>
+        <button class="kc-close" id="codex-close" type="button" aria-label="关闭图鉴">×</button>
+      </header>
+      <div class="codex-body" id="codex-body"></div>
+    </div>
+  </div>
+
+  <script src="js/signs.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/connect.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>
