@@ -3,7 +3,9 @@
 > 一款把化工安全知识嵌进「连连看」通关机制里的纯前端网页小游戏。
 > 认标志、辨危化品、处置泄漏——连对了才通关，连错了要扣时间。
 
-**在线试玩**：【部署后填写，例如 https://yourname.github.io/chem-safety-match/】
+**在线试玩**：<https://9ns8q4695h-dot.github.io/chem-safety-match/>
+
+> 已用 GitHub Pages 部署（仓库：<https://github.com/9ns8q4695h-dot/chem-safety-match>，公开）。若链接失效，可按文末「运行与部署」自行重新发布。
 
 - 安全领域：化工安全（危化品 / 安全标识 / 应急处置）
 - 玩法类型：连连看（配对消除），中难度
@@ -105,7 +107,14 @@ python -m http.server 8000
 # 然后访问 http://localhost:8000
 ```
 
-### 4. 部署到 GitHub Pages
+### 4. 部署到 GitHub Pages（本项目已用此方式上线）
+
+本项目实际部署信息：
+
+- 仓库：<https://github.com/9ns8q4695h-dot/chem-safety-match>（Public）
+- 站点：<https://9ns8q4695h-dot.github.io/chem-safety-match/>（Source：`Deploy from a branch` → `main` / `(root)`，已勾选 Enforce HTTPS）
+
+自己重新部署的步骤：
 
 1. 新建仓库（如 `chem-safety-match`），把本项目**根目录全部文件**上传（确保 `index.html` 在仓库根目录）；
 2. 仓库 → Settings → Pages → Source 选 `Deploy from a branch` → 分支 `main`、目录 `/ (root)` → Save；
@@ -255,3 +264,4 @@ node tests/validate.js     # 30 对数据 + 7 组寻路用例 + 两套布局整�
 | --- | --- | --- |
 | v1.0.0 | 2026-11 | 三关 30 对卡牌、连连看寻路、知识卡与图鉴、音效、移动端适配、存档与评级 |
 | v1.0.1 | 2026-11 | 依据核查后更新标准号（GB 2894-2025、GB 9448-2025、GB 11984-2024、GB 30000.1-2024）；知识卡展示时暂停计时；配对即收入图鉴；修复移动端 HUD 截断与关卡卡排版 |
+| v1.0.2 | 2026-11 | 用 GitHub Pages 上线（公开 URL 写入 README）；首页「知识依据」面板同步最新标准号，并补 GB 39800.1-2020、应急管理部令第 13 号、GBZ 54-2017 |
