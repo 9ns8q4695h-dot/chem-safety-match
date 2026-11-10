@@ -155,3 +155,18 @@
 - 代码与文案：AI 生成初稿，组员逐段阅读、运行、修改后保留；
 - 安全知识：AI 生成初稿，**全部经联网核查与人工复核**，错误与修正见上表与 `docs/knowledge-verification.md`；
 - 本文档由组员根据开发过程整理，AI 参与润色；提交前请组员通读，确保能用自己的话讲清每一处修改原因。
+
+---
+
+## 八、部署过程记录（补充）
+
+在线地址：<https://9ns8q4695h-dot.github.io/chem-safety-match/>（GitHub Pages，仓库 <https://github.com/9ns8q4695h-dot/chem-safety-match>）
+
+部署阶段同样踩了 AI/工具的坑，记录如下：
+
+1. **细粒度 PAT 不是“万能钥匙”**：AI 按「classic PAT」写脚本，直接 `POST /user/repos` 建仓库、`POST /repos/…/pages` 开 Pages，实际用户提供的是 fine-grained PAT，两个请求都返回 `403 {"message":"Resource not accessible by personal access token"}`。修正：在网页里把令牌 Repository access 改成 All repositories，并加上 Contents、Pages 的 Read and write；仓库与 Pages 则改在网页 UI 创建/开启。教训：AI 默认 token=全权限，实际要逐项核权限。
+2. **中文文件名编码**：脚本最初对整个相对路径做 `encodeURIComponent`，中文文件名上传报 `fetch failed`；改为按路径段分别编码（`split(path.sep).map(encodeURIComponent).join("/")`）后 `PUT` 成功。
+3. **Pages 构建状态会“假报错”**：刚推送后 `GET /pages` 的 `status` 短暂为 `errored`，但 `builds/latest` 仍是 `building`；若只看前者会误判部署失败。改为以构建记录为准，约 30 秒后 `built`。
+4. **沙箱/网络噪声**：本地沙箱曾报 `windows-acl-run: --temp is not an existing directory`，重建临时目录后恢复；GitHub API 偶发 `UND_ERR_CONNECT_TIMEOUT`，脚本加了 6 次指数退避重试。
+
+这些都属于「AI 生成的部署脚本看起来合理、但与真实权限/网络环境不符」，和知识核查一样，需要在真实环境里跑一遍才知道。
